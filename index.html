@@ -1,0 +1,1288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字遗产继承之旅：守护最后的数字印记</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'PingFang SC', 'Microsoft YaHei', sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: #fff;
+            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 10px 20px;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            text-align: center;
+            padding: 15px 0;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, #fff, #a8e6cf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 10px;
+        }
+
+        .stats-panel {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            min-width: 250px;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.85rem;
+        }
+
+        .stats-panel h3 {
+            margin-bottom: 10px;
+            color: #a8e6cf;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 0.8rem;
+            padding: 3px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .journey-map {
+            position: relative;
+            height: 280px;
+            background: linear-gradient(135deg, rgba(30, 60, 114, 0.1), rgba(142, 68, 173, 0.1));
+            border-radius: 15px;
+            margin: 10px 0;
+            overflow: hidden;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            flex-shrink: 0;
+        }
+
+        .journey-path {
+            position: absolute;
+            top: 50%;
+            left: 8%;
+            right: 8%;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                rgba(255,255,255,0.2) 0%, 
+                rgba(255,255,255,0.6) 50%, 
+                rgba(255,255,255,0.2) 100%);
+            border-radius: 2px;
+            transform: translateY(-50%);
+            box-shadow: 0 0 8px rgba(255,255,255,0.3);
+        }
+
+        .journey-node {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+        }
+
+        .journey-node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(255,255,255,0.6);
+        }
+
+        .journey-node.active {
+            background: linear-gradient(45deg, #F39C12, #E67E22);
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 20px rgba(243, 156, 18, 0.8);
+        }
+
+        .journey-node.visited {
+            background: linear-gradient(45deg, #3498DB, #2980B9);
+            border-color: #3498DB;
+        }
+
+        .journey-node.success {
+            background: linear-gradient(45deg, #27AE60, #2ECC71);
+        }
+
+        .journey-node.blocked {
+            background: linear-gradient(45deg, #95A5A6, #7F8C8D);
+        }
+
+        .journey-node.warning {
+            background: linear-gradient(45deg, #F1C40F, #F39C12);
+        }
+
+        .node-icon {
+            font-size: 1.5rem;
+            z-index: 2;
+        }
+
+        /* 小人角色 */
+        .character {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            transition: all 1s ease-in-out;
+            z-index: 100;
+            top: 45%;
+            left: 5%;
+        }
+
+        .character-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #FF6B6B, #4ECDC4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            animation: bounce 2s infinite;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.3);
+            border: 3px solid #fff;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+            60% { transform: translateY(-4px); }
+        }
+
+        /* 情感指示器 */
+        .emotional-indicator {
+            display: flex;
+            justify-content: center;
+            margin: 8px 0;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .emotion {
+            font-size: 1.5rem;
+            opacity: 0.3;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .emotion.active {
+            opacity: 1;
+            transform: scale(1.2);
+            background: rgba(255,255,255,0.2);
+            box-shadow: 0 0 15px rgba(255,255,255,0.5);
+        }
+
+        /* 进度条 */
+        .progress-container {
+            margin: 10px 0;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 3px;
+            backdrop-filter: blur(10px);
+            flex-shrink: 0;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #F39C12, #E67E22, #27AE60);
+            width: 0%;
+            transition: width 0.8s ease;
+            border-radius: 15px;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 5px;
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+
+        /* 对话气泡系统 */
+        .dialogue-container {
+            flex: 1;
+            margin: 10px 0;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dialogue-panel {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            flex: 1;
+            min-height: 0;
+        }
+
+        .user-thoughts, .system-response {
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            border-radius: 12px;
+            backdrop-filter: blur(15px);
+            border: 2px solid;
+            position: relative;
+            opacity: 0;
+            transform: translateY(15px);
+            transition: all 0.5s ease;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .user-thoughts {
+            border-color: #FF6B6B;
+            background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(0,0,0,0.8));
+        }
+
+        .system-response {
+            border-color: #4ECDC4;
+            background: linear-gradient(135deg, rgba(78,205,196,0.1), rgba(0,0,0,0.8));
+        }
+
+        .dialogue-panel.active .user-thoughts,
+        .dialogue-panel.active .system-response {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .dialogue-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .dialogue-avatar {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            margin-right: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .user-avatar {
+            background: #FF6B6B;
+        }
+
+        .system-avatar {
+            background: #4ECDC4;
+        }
+
+        .dialogue-content {
+            line-height: 1.4;
+            font-size: 0.9rem;
+            flex: 1;
+            overflow-y: auto;
+            margin: 8px 0;
+        }
+
+        .dialogue-details {
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.2);
+            font-size: 0.75rem;
+            opacity: 0.8;
+            flex-shrink: 0;
+        }
+
+        .detail-item {
+            margin-bottom: 3px;
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            text-align: center;
+            margin: 10px 0 15px 0;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 1001;
+            background: rgba(30, 60, 114, 0.8);
+            padding: 12px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            flex-shrink: 0;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #3498DB, #2980B9);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 12px rgba(52, 152, 219, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn:hover::before {
+            left: 100%;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(52, 152, 219, 0.5);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn.primary {
+            background: linear-gradient(45deg, #E74C3C, #C0392B);
+            box-shadow: 0 3px 12px rgba(231, 76, 60, 0.3);
+        }
+
+        .btn.success {
+            background: linear-gradient(45deg, #27AE60, #229954);
+            box-shadow: 0 3px 12px rgba(39, 174, 96, 0.3);
+        }
+
+        /* 节点详情弹窗 */
+        .node-detail-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .node-detail-modal.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, rgba(30,60,114,0.95), rgba(42,82,152,0.95));
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(255,255,255,0.2);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .node-detail-modal.active .modal-content {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            color: #a8e6cf;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-close:hover {
+            opacity: 1;
+        }
+
+        /* 浮动粒子 */
+        .floating-particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 8s infinite linear;
+        }
+
+        .particle.small {
+            width: 2px;
+            height: 2px;
+            background: rgba(255,255,255,0.4);
+        }
+
+        .particle.medium {
+            width: 3px;
+            height: 3px;
+            background: rgba(168,230,207,0.3);
+        }
+
+        .particle.large {
+            width: 4px;
+            height: 4px;
+            background: rgba(243,156,18,0.2);
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .container {
+                padding: 5px 10px;
+            }
+            
+            .stats-panel {
+                position: relative;
+                top: auto;
+                right: auto;
+                margin-bottom: 10px;
+                min-width: auto;
+                font-size: 0.75rem;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .journey-map {
+                height: 200px;
+            }
+            
+            .journey-node {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .node-icon {
+                font-size: 1.2rem;
+            }
+            
+            .dialogue-panel {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+            
+            .control-panel {
+                gap: 5px;
+                padding: 8px;
+            }
+            
+            .btn {
+                font-size: 0.75rem;
+                padding: 6px 12px;
+            }
+            
+            .dialogue-content {
+                font-size: 0.8rem;
+            }
+            
+            .detail-item {
+                font-size: 0.7rem;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-particles" id="particles"></div>
+    
+    <div class="container">
+        <div class="header">
+            <h1>数字遗产继承之旅</h1>
+            <p>当至亲离去，我尝试在腾讯生态中，守护他留下的数字印记。</p>
+            <div class="emotional-indicator">
+                <span class="emotion" data-emotion="confused" title="困惑">😕</span>
+                <span class="emotion" data-emotion="hopeful" title="希望">🤔</span>
+                <span class="emotion" data-emotion="frustrated" title="沮丧">😤</span>
+                <span class="emotion" data-emotion="sad" title="悲伤">😢</span>
+                <span class="emotion" data-emotion="determined" title="坚定">💪</span>
+                <span class="emotion" data-emotion="relieved" title="释然">😌</span>
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <h3>📊 旅程数据</h3>
+            <div class="stat-item">
+                <span>当前进度:</span>
+                <span id="current-progress">0%</span>
+            </div>
+            <div class="stat-item">
+                <span>成功率:</span>
+                <span id="success-rate">未知</span>
+            </div>
+            <div class="stat-item">
+                <span>平均耗时:</span>
+                <span id="avg-time">0天</span>
+            </div>
+            <div class="stat-item">
+                <span>用户满意度:</span>
+                <span id="satisfaction">0/5</span>
+            </div>
+            <div class="stat-item">
+                <span>已访问节点:</span>
+                <span id="visited-nodes">0/8</span>
+            </div>
+            <div class="stat-item">
+                <span>发现痛点:</span>
+                <span id="pain-points">0个</span>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress-fill"></div>
+            </div>
+            <div class="progress-text" id="progress-text">准备开始旅程...</div>
+        </div>
+
+        <div class="journey-map">
+            <div class="journey-path"></div>
+            
+            <!-- 小人角色 -->
+            <div class="character" id="character">
+                <div class="character-avatar">👤</div>
+            </div>
+            
+            <!-- 节点1: 起点 -->
+            <div class="journey-node active" style="left: 8%; top: 45%;" data-node="0">
+                <div class="node-icon">🏠</div>
+            </div>
+
+            <!-- 节点2: 统一入口的迷思 -->
+            <div class="journey-node blocked" style="left: 20%; top: 25%;" data-node="1">
+                <div class="node-icon">🔍</div>
+            </div>
+
+            <!-- 节点3: 账号归属的"隐私墙" -->
+            <div class="journey-node blocked" style="left: 32%; top: 15%;" data-node="2">
+                <div class="node-icon">💬</div>
+            </div>
+
+            <!-- 节点4: 微信/QQ钱包：资产的继承 -->
+            <div class="journey-node warning" style="left: 44%; top: 65%;" data-node="3">
+                <div class="node-icon">💰</div>
+            </div>
+
+            <!-- 节点5: 聊天记录与朋友圈：情感的断点 -->
+            <div class="journey-node blocked" style="left: 56%; top: 30%;" data-node="4">
+                <div class="node-icon">😢</div>
+            </div>
+
+            <!-- 节点6: 腾讯文档：数据与证明 -->
+            <div class="journey-node warning" style="left: 68%; top: 20%;" data-node="5">
+                <div class="node-icon">📄</div>
+            </div>
+
+            <!-- 节点7: 游戏资产：虚拟世界的消逝 -->
+            <div class="journey-node blocked" style="left: 80%; top: 50%;" data-node="6">
+                <div class="node-icon">🎮</div>
+            </div>
+
+            <!-- 节点8: 终点：反思与呼吁 -->
+            <div class="journey-node success" style="left: 92%; top: 45%;" data-node="7">
+                <div class="node-icon">🎯</div>
+            </div>
+        </div>
+
+        <!-- 对话系统 -->
+        <div class="dialogue-container">
+            <div class="dialogue-panel" id="dialogue-panel">
+                <div class="user-thoughts">
+                    <div class="dialogue-header">
+                        <div class="dialogue-avatar user-avatar">👤</div>
+                        <span>我的想法</span>
+                    </div>
+                    <div class="dialogue-content" id="user-thoughts-content">
+                        点击节点开始您的数字遗产继承之旅...
+                    </div>
+                    <div class="dialogue-details" id="user-details">
+                        <div class="detail-item">💭 内心状态: 准备中</div>
+                        <div class="detail-item">🎯 当前目标: 了解流程</div>
+                    </div>
+                </div>
+                
+                <div class="system-response">
+                    <div class="dialogue-header">
+                        <div class="dialogue-avatar system-avatar">🤖</div>
+                        <span>系统反馈</span>
+                    </div>
+                    <div class="dialogue-content" id="system-response-content">
+                        系统准备就绪，等待用户操作...
+                    </div>
+                    <div class="dialogue-details" id="system-details">
+                        <div class="detail-item">⚙️ 系统状态: 待机中</div>
+                        <div class="detail-item">📋 可用选项: 浏览节点</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="control-panel">
+            <button class="btn" id="prev-btn" disabled>← 上一步</button>
+            <button class="btn primary" id="next-btn">下一步 →</button>
+            <button class="btn" id="reset-btn">🔄 重新开始</button>
+            <button class="btn success" id="auto-play-btn">▶️ 自动播放</button>
+            <button class="btn" id="detail-btn">📋 查看详情</button>
+        </div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div class="node-detail-modal" id="detail-modal">
+        <div class="modal-content">
+            <button class="modal-close" id="modal-close">×</button>
+            <div class="modal-header">
+                <div class="modal-title" id="modal-title">节点详情</div>
+            </div>
+            <div id="modal-body">
+                <!-- 详细内容将在这里动态加载 -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 重构后的旅程数据
+        const journeyData = [
+            {
+                title: "起点：骤然离去与数字寻觅",
+                userThoughts: "家人突然离世，他的微信里还有余额，QQ空间里有珍贵的照片。我该如何开始，守护他最后的数字印记？",
+                systemResponse: "欢迎使用腾讯数字遗产服务。请注意：不同产品有不同的继承政策，且账号本身不具备继承属性。",
+                emotion: "confused",
+                userDetails: {
+                    mood: "悲伤、困惑",
+                    goal: "了解数字遗产继承流程",
+                    concerns: "不知道从何开始，担心遗失重要信息"
+                },
+                systemDetails: {
+                    status: "服务可用",
+                    options: "查看各产品继承政策",
+                    requirements: "需要提供相关证明材料"
+                },
+                stats: { progress: 0, successRate: "未知", avgTime: "0天", satisfaction: "0/5", painPoints: 0 },
+                detailedInfo: {
+                    background: "家人突然离世，用户面临数字资产继承和情感数据留存的双重诉求。",
+                    challenges: ["缺乏统一的起始点", "情感压力巨大", "不清楚数字遗产的边界"],
+                    opportunities: ["了解各平台政策", "准备必要材料", "寻求专业帮助"]
+                }
+            },
+            {
+                title: "统一入口的迷思",
+                userThoughts: "是否有统一的\"纪念账号\"或\"遗产联系人\"产品？我可以在哪里申请继承？",
+                systemResponse: "抱歉，目前没有生前设置的纪念账号产品。继承服务分散在各产品线，请分别联系各产品客服。",
+                emotion: "frustrated",
+                userDetails: {
+                    mood: "迷茫、焦虑",
+                    goal: "找到正确的申请入口",
+                    concerns: "浪费时间，不知道找谁"
+                },
+                systemDetails: {
+                    status: "服务分散",
+                    options: "分别联系各产品客服",
+                    requirements: "需要多次咨询"
+                },
+                stats: { progress: 10, successRate: "15%", avgTime: "3天", satisfaction: "1.0/5", painPoints: 2 },
+                detailedInfo: {
+                    background: "腾讯生态内缺乏统一的数字遗产服务入口，各业务依赖人工客服个案处理。",
+                    challenges: ["入口分散", "信息不对称", "无预设机制"],
+                    impact: "用户在悲痛中浪费大量时间寻找入口，加剧焦虑。访谈显示，团队担忧\"死亡预设\"功能的用户心理接受度。"
+                }
+            },
+            {
+                title: "账号归属的\"隐私墙\"",
+                userThoughts: "我可以直接继承家人的微信/QQ账号吗？这样我就可以直接登录查看他的一切了。",
+                systemResponse: "根据用户协议，账号主体归平台所有，不支持继承。出于隐私保护，平台不提供账号转移或登录权限。",
+                emotion: "sad",
+                userDetails: {
+                    mood: "失望、无助",
+                    goal: "尝试获取账号登录权限",
+                    concerns: "账号里的重要信息无法获取"
+                },
+                systemDetails: {
+                    status: "账号不可继承",
+                    options: "尝试申请资产继承",
+                    requirements: "法务与隐私顾虑普遍"
+                },
+                stats: { progress: 25, successRate: "10%", avgTime: "7天", satisfaction: "0.5/5", painPoints: 4 },
+                detailedInfo: {
+                    background: "微信/QQ账号被视为个人身份标识，归平台所有，不具备继承属性。",
+                    challenges: ["法律合规", "隐私顾虑", "账号不可转移"],
+                    impact: "失去的不仅是账号，更是用户在数字世界中的身份和社交关系链。"
+                }
+            },
+            {
+                title: "微信/QQ钱包：资产的继承",
+                userThoughts: "太好了！微信/QQ钱包里的余额可以申请继承。但是要这么多材料...死亡证明、公证书，还要等这么久？",
+                systemResponse: "您的财产继承申请已进入审核流程。需提供法定证明材料，预计需要7-15个工作日。",
+                emotion: "determined",
+                userDetails: {
+                    mood: "坚定、疲惫",
+                    goal: "完成资产继承申请",
+                    concerns: "流程繁琐，时间漫长"
+                },
+                systemDetails: {
+                    status: "流程严谨",
+                    options: "等待审核结果",
+                    requirements: "提供完整的法律文件"
+                },
+                stats: { progress: 40, successRate: "50%", avgTime: "15天", satisfaction: "2.5/5", painPoints: 5 },
+                detailedInfo: {
+                    background: "微信支付、QQ钱包等货币性资产具备可依法继承机制。",
+                    challenges: ["材料复杂", "流程不透明", "跨产品识别难"],
+                    materials: ["死亡证明", "亲属关系证明", "继承人身份证明", "公证书/法院裁定"],
+                    impact: "流程的严谨性与用户在悲痛期的心理负担形成强烈冲突。"
+                }
+            },
+            {
+                title: "聊天记录与朋友圈：情感的断点",
+                userThoughts: "资产可以继承，但那些聊天记录、朋友圈能否导出？我想再听听家人的声音，看看他的照片...",
+                systemResponse: "抱歉，聊天记录、朋友圈内容、好友关系链一律不开放导出。这些信息被视为个人隐私，平台无权访问或转移。",
+                emotion: "sad",
+                userDetails: {
+                    mood: "绝望、悲伤",
+                    goal: "尝试获取情感数据",
+                    concerns: "失去与逝者最后的\"连接\""
+                },
+                systemDetails: {
+                    status: "隐私限制",
+                    options: "尝试通过本地设备备份",
+                    requirements: "服务器不保存长期聊天记录"
+                },
+                stats: { progress: 55, successRate: "5%", avgTime: "20天", satisfaction: "0.5/5", painPoints: 7 },
+                detailedInfo: {
+                    background: "聊天记录、朋友圈、QQ空间内容等被视为强隐私信息，一律不开放导出。",
+                    challenges: ["技术限制（本地存储）", "隐私边界（涉及第三方）", "情感诉求无法满足"],
+                    impact: "最大的舆情风险来自\"家属无法获取纪念内容\"而产生的情感反弹。失去的不仅是数据，更是与逝者最后的\"连接\"。"
+                }
+            },
+            {
+                title: "腾讯文档：数据与证明",
+                userThoughts: "幸好家人生前在腾讯文档里留下了遗嘱草稿和一些重要文件。这些数据能顺利拿到吗？",
+                systemResponse: "腾讯文档数据属于数字内容资产，需提供公证书等材料，经审核后可提取。流程相对清晰，但仍需法律文件证明。",
+                emotion: "hopeful",
+                userDetails: {
+                    mood: "谨慎、期待",
+                    goal: "获取重要文件数据",
+                    concerns: "担心数据所有权证明复杂"
+                },
+                systemDetails: {
+                    status: "内容资产可提取",
+                    options: "准备公证书",
+                    requirements: "需区分个人数据和财产数据"
+                },
+                stats: { progress: 70, successRate: "65%", avgTime: "25天", satisfaction: "3.0/5", painPoints: 4 },
+                detailedInfo: {
+                    background: "腾讯文档、邮箱等数据内容资产的继承。",
+                    challenges: ["数据分级复杂", "法律证明要求高", "技术实现难度"],
+                    opportunities: ["平台应提供\"数字遗嘱\"功能", "简化非敏感数据的提取流程"]
+                }
+            },
+            {
+                title: "游戏资产：虚拟世界的消逝",
+                userThoughts: "那游戏呢？他的账号我能再使用吗？里面的皮肤、点券、段位这些荣誉资产呢？",
+                systemResponse: "游戏账号本身不可继承。点券、皮肤等虚拟资产依赖账号，无法独立转移或返还。荣誉资产也不支持转移。",
+                emotion: "sad",
+                userDetails: {
+                    mood: "无奈、失落",
+                    goal: "尝试保留游戏账号或资产",
+                    concerns: "虚拟资产无法继承"
+                },
+                systemDetails: {
+                    status: "账号不可继承",
+                    options: "建议截图或录屏保存",
+                    requirements: "虚拟资产依赖账号，独立不出来"
+                },
+                stats: { progress: 85, successRate: "20%", avgTime: "28天", satisfaction: "1.5/5", painPoints: 6 },
+                detailedInfo: {
+                    background: "游戏账号（如王者荣耀）的虚拟资产继承。",
+                    challenges: ["资产分离难", "荣誉不可转", "纪念模式缺失"],
+                    impact: "游戏里的数字身份已超越娱乐，其消逝对家属也是一种情感损失。"
+                }
+            },
+            {
+                title: "终点：反思与呼吁",
+                userThoughts: "整个过程耗时漫长，心力交瘁。希望未来能有一个更人性化、更统一的流程。",
+                systemResponse: "感谢您的反馈。您的经历将帮助我们改进服务。数字遗产的未来需要更多关注和立法推动。",
+                emotion: "relieved",
+                userDetails: {
+                    mood: "释然、反思",
+                    goal: "总结旅程，提出改进建议",
+                    concerns: "流程缺乏人性化"
+                },
+                systemDetails: {
+                    status: "旅程结束",
+                    options: "推动行业标准与立法",
+                    requirements: "探索\"纪念化\"展示路径"
+                },
+                stats: { progress: 100, successRate: "35%", avgTime: "30天", satisfaction: "2.0/5", painPoints: 0 },
+                detailedInfo: {
+                    background: "旅程结束，用户对整个流程进行总结和反思。",
+                    challenges: ["流程缺乏人性化", "缺乏统一标准", "法律框架缺失"],
+                    opportunities: ["呼吁行业建立统一标准", "推动数字遗产立法", "探索\"纪念化\"展示的技术与产品路径"]
+                }
+            }
+        ];
+
+        let currentStep = 0;
+        let autoPlayInterval = null;
+        let visitedNodes = new Set([0]);
+
+        // DOM 元素
+        const nodes = document.querySelectorAll('.journey-node');
+        const character = document.getElementById('character');
+        const dialoguePanel = document.getElementById('dialogue-panel');
+        const userThoughtsContent = document.getElementById('user-thoughts-content');
+        const systemResponseContent = document.getElementById('system-response-content');
+        const userDetails = document.getElementById('user-details');
+        const systemDetails = document.getElementById('system-details');
+        const progressFill = document.getElementById('progress-fill');
+        const progressText = document.getElementById('progress-text');
+        const emotions = document.querySelectorAll('.emotion');
+
+        // 控制按钮
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const autoPlayBtn = document.getElementById('auto-play-btn');
+        const detailBtn = document.getElementById('detail-btn');
+
+        // 统计面板元素
+        const currentProgressEl = document.getElementById('current-progress');
+        const successRateEl = document.getElementById('success-rate');
+        const avgTimeEl = document.getElementById('avg-time');
+        const satisfactionEl = document.getElementById('satisfaction');
+        const visitedNodesEl = document.getElementById('visited-nodes');
+        const painPointsEl = document.getElementById('pain-points');
+
+        // 详情弹窗
+        const detailModal = document.getElementById('detail-modal');
+        const modalClose = document.getElementById('modal-close');
+        const modalTitle = document.getElementById('modal-title');
+        const modalBody = document.getElementById('modal-body');
+
+        // 初始化
+        function init() {
+            updateDisplay();
+            createEnhancedParticles();
+            
+            // 添加节点点击事件
+            nodes.forEach((node, index) => {
+                node.addEventListener('click', () => goToStep(index));
+            });
+
+            // 按钮事件
+            prevBtn.addEventListener('click', prevStep);
+            nextBtn.addEventListener('click', nextStep);
+            resetBtn.addEventListener('click', reset);
+            autoPlayBtn.addEventListener('click', toggleAutoPlay);
+            detailBtn.addEventListener('click', showDetailModal);
+            modalClose.addEventListener('click', hideDetailModal);
+
+            // 点击模态框背景关闭
+            detailModal.addEventListener('click', (e) => {
+                if (e.target === detailModal) {
+                    hideDetailModal();
+                }
+            });
+        }
+
+        // 更新显示
+        function updateDisplay() {
+            const data = journeyData[currentStep];
+            
+            // 更新对话内容
+            userThoughtsContent.textContent = data.userThoughts;
+            systemResponseContent.textContent = data.systemResponse;
+            
+            // 更新详细信息
+            userDetails.innerHTML = `
+                <div class="detail-item">💭 心情: ${data.userDetails.mood}</div>
+                <div class="detail-item">🎯 目标: ${data.userDetails.goal}</div>
+                <div class="detail-item">😟 担忧: ${data.userDetails.concerns}</div>
+            `;
+            
+            systemDetails.innerHTML = `
+                <div class="detail-item">⚙️ 状态: ${data.systemDetails.status}</div>
+                <div class="detail-item">📋 选项: ${data.systemDetails.options}</div>
+                <div class="detail-item">📝 要求: ${data.systemDetails.requirements}</div>
+            `;
+
+            // 特殊处理起点节点：只显示用户想法，居中显示
+            if (currentStep === 0) {
+                dialoguePanel.style.gridTemplateColumns = '1fr';
+                dialoguePanel.style.justifyItems = 'center';
+                document.querySelector('.system-response').style.display = 'none';
+                document.querySelector('.user-thoughts').style.maxWidth = '600px';
+            } else {
+                dialoguePanel.style.gridTemplateColumns = '1fr 1fr';
+                dialoguePanel.style.justifyItems = 'stretch';
+                document.querySelector('.system-response').style.display = 'flex';
+                document.querySelector('.user-thoughts').style.maxWidth = 'none';
+            }
+
+            // 激活对话面板动画
+            dialoguePanel.classList.remove('active');
+            setTimeout(() => {
+                dialoguePanel.classList.add('active');
+            }, 100);
+
+            // 更新进度条和文本
+            progressFill.style.width = `${data.stats.progress}%`;
+            progressText.textContent = `${data.title} (${data.stats.progress}%)`;
+
+            // 更新统计面板
+            currentProgressEl.textContent = `${data.stats.progress}%`;
+            successRateEl.textContent = data.stats.successRate;
+            avgTimeEl.textContent = data.stats.avgTime;
+            satisfactionEl.textContent = data.stats.satisfaction;
+            visitedNodesEl.textContent = `${visitedNodes.size}/8`;
+            painPointsEl.textContent = `${data.stats.painPoints}个`;
+
+            // 更新节点状态
+            nodes.forEach((node, index) => {
+                node.classList.remove('active');
+                if (visitedNodes.has(index)) {
+                    node.classList.add('visited');
+                }
+                if (index === currentStep) {
+                    node.classList.add('active');
+                    node.classList.remove('visited');
+                }
+            });
+
+            // 移动小人角色
+            moveCharacter();
+
+            // 更新情感指示器
+            emotions.forEach(emotion => emotion.classList.remove('active'));
+            const currentEmotion = document.querySelector(`[data-emotion="${data.emotion}"]`);
+            if (currentEmotion) {
+                currentEmotion.classList.add('active');
+            }
+
+            // 更新按钮状态
+            prevBtn.disabled = currentStep === 0;
+            nextBtn.disabled = currentStep === journeyData.length - 1;
+            
+            // 标记节点为已访问
+            visitedNodes.add(currentStep);
+        }
+
+        // 移动小人角色
+        function moveCharacter() {
+            const targetNode = nodes[currentStep];
+            const nodeRect = targetNode.getBoundingClientRect();
+            const mapRect = document.querySelector('.journey-map').getBoundingClientRect();
+            
+            const targetLeft = ((nodeRect.left - mapRect.left) / mapRect.width) * 100;
+            const targetTop = ((nodeRect.top - mapRect.top) / mapRect.height) * 100;
+            
+            character.style.left = `${targetLeft - 3}%`;
+            character.style.top = `${targetTop - 3}%`;
+        }
+
+        // 显示详情弹窗
+        function showDetailModal() {
+            const data = journeyData[currentStep];
+            modalTitle.textContent = data.title;
+            
+            modalBody.innerHTML = `
+                <div style="margin-bottom: 15px;">
+                    <h4 style="color: #a8e6cf; margin-bottom: 8px;">📖 背景信息</h4>
+                    <p style="line-height: 1.5; font-size: 0.9rem;">${data.detailedInfo.background}</p>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <h4 style="color: #f39c12; margin-bottom: 8px;">⚠️ 主要挑战</h4>
+                    <ul style="padding-left: 15px; line-height: 1.5; font-size: 0.9rem;">
+                        ${data.detailedInfo.challenges.map(challenge => `<li>${challenge}</li>`).join('')}
+                    </ul>
+                </div>
+                
+                ${data.detailedInfo.impact ? `
+                <div style="margin-bottom: 15px;">
+                    <h4 style="color: #e74c3c; margin-bottom: 8px;">📊 影响分析</h4>
+                    <p style="line-height: 1.5; font-size: 0.9rem;">${data.detailedInfo.impact}</p>
+                </div>
+                ` : ''}
+                
+                ${data.detailedInfo.materials ? `
+                <div style="margin-bottom: 15px;">
+                    <h4 style="color: #3498db; margin-bottom: 8px;">📋 所需材料</h4>
+                    <ul style="padding-left: 15px; line-height: 1.5; font-size: 0.9rem;">
+                        ${data.detailedInfo.materials.map(material => `<li>${material}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+                
+                ${data.detailedInfo.opportunities ? `
+                <div>
+                    <h4 style="color: #27ae60; margin-bottom: 8px;">💡 改进机会</h4>
+                    <ul style="padding-left: 15px; line-height: 1.5; font-size: 0.9rem;">
+                        ${data.detailedInfo.opportunities.map(opp => `<li>${opp}</li>`).join('')}
+                    </ul>
+                </div>
+                ` : ''}
+            `;
+            
+            detailModal.classList.add('active');
+        }
+
+        // 隐藏详情弹窗
+        function hideDetailModal() {
+            detailModal.classList.remove('active');
+        }
+
+        // 导航函数
+        function nextStep() {
+            if (currentStep < journeyData.length - 1) {
+                currentStep++;
+                updateDisplay();
+            }
+        }
+
+        function prevStep() {
+            if (currentStep > 0) {
+                currentStep--;
+                updateDisplay();
+            }
+        }
+
+        function goToStep(step) {
+            if (step >= 0 && step < journeyData.length) {
+                currentStep = step;
+                updateDisplay();
+            }
+        }
+
+        function reset() {
+            currentStep = 0;
+            visitedNodes = new Set([0]);
+            updateDisplay();
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+                autoPlayBtn.innerHTML = '▶️ 自动播放';
+            }
+        }
+
+        function toggleAutoPlay() {
+            if (autoPlayInterval) {
+                clearInterval(autoPlayInterval);
+                autoPlayInterval = null;
+                autoPlayBtn.innerHTML = '▶️ 自动播放';
+            } else {
+                autoPlayInterval = setInterval(() => {
+                    if (currentStep < journeyData.length - 1) {
+                        nextStep();
+                    } else {
+                        clearInterval(autoPlayInterval);
+                        autoPlayInterval = null;
+                        autoPlayBtn.innerHTML = '▶️ 自动播放';
+                    }
+                }, 4000);
+                autoPlayBtn.innerHTML = '⏸️ 停止播放';
+            }
+        }
+
+        // 创建增强的粒子效果
+        function createEnhancedParticles() {
+            const particlesContainer = document.getElementById('particles');
+            
+            // 创建不同大小的粒子
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                const size = Math.random() > 0.7 ? 'large' : (Math.random() > 0.4 ? 'medium' : 'small');
+                particle.className = `particle ${size}`;
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 8 + 's';
+                particle.style.animationDuration = (Math.random() * 4 + 4) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // 键盘导航增强
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    prevStep();
+                    break;
+                case 'ArrowRight':
+                case ' ':
+                    e.preventDefault();
+                    nextStep();
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    reset();
+                    break;
+                case 'Enter':
+                    e.preventDefault();
+                    showDetailModal();
+                    break;
+                case 'Escape':
+                    e.preventDefault();
+                    hideDetailModal();
+                    break;
+            }
+        });
+
+        // 初始化函数
+        function init() {
+            updateDisplay();
+            createEnhancedParticles();
+            
+            // 添加节点点击事件
+            nodes.forEach((node, index) => {
+                node.addEventListener('click', () => goToStep(index));
+            });
+
+            // 按钮事件绑定
+            prevBtn.addEventListener('click', prevStep);
+            nextBtn.addEventListener('click', nextStep);
+            resetBtn.addEventListener('click', reset);
+            autoPlayBtn.addEventListener('click', toggleAutoPlay);
+            detailBtn.addEventListener('click', showDetailModal);
+            modalClose.addEventListener('click', hideDetailModal);
+
+            // 点击模态框背景关闭
+            detailModal.addEventListener('click', (e) => {
+                if (e.target === detailModal) {
+                    hideDetailModal();
+                }
+            });
+        }
+
+        // 启动应用
+        init();
+    </script>
+</body>
+</html>
